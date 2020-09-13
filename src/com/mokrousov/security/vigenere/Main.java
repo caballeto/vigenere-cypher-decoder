@@ -46,8 +46,8 @@ public class Main {
   // for each of the subsequences compute the character distribution
   // then find the index of coincidence
   // take the average over all subsequences
-  // find the first one, which has the index >= 0.06 (this may be incorrect sometimes)
-  // finally return the length
+  // find the first one, which has the index >= 0.06 (this may be incorrect sometimes I think)
+  // finally return the length of the key
   public static int findKeyLength(String text) {
     for (int len = 1; len <= Math.min(text.length(), 25); len++) {
       double averageIndex = 0;
@@ -87,13 +87,13 @@ public class Main {
   
   // find length of key using coincidence index
   // find the mapping using frequency analysis
-  // return decoded key
+  // return decoded string
   public static String decrypt(String text) {
     int len = findKeyLength(text);
     StringBuilder key = new StringBuilder();
   
     // for each letter find new distribution
-    // find the correlation of distibution
+    // find the correlation of distribution
     // save max value for given character
     // append the character to the given key
     // return decoded text
@@ -128,6 +128,9 @@ public class Main {
     return decode(text, key.toString());
   }
   
+  // takes input from resources/small.txt file
+  // remove all punctuation and transforms to lowercase
+  // then proceeds with encoding and decoding
   public static void main(String[] args) throws IOException {
     String key = "abc";
     String text = preprocess(Files.readString(Path.of("resources/small.txt")));
