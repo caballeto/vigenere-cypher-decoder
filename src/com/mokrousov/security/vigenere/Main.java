@@ -132,7 +132,7 @@ public class Main {
   // remove all punctuation and transforms to lowercase
   // then proceeds with encoding and decoding
   public static void main(String[] args) throws IOException {
-    String key = "abc";
+    String key = "efgh";
     String text = preprocess(Files.readString(Path.of("resources/small.txt")));
     String encoded = encode(text, key);
     String decoded = decrypt(encoded);
