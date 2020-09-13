@@ -5,25 +5,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Main {
-  public static final double[] FREQUENCIES = {0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228, 0.02015,
+  public static final double[] FREQUENCIES = {
+    0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228, 0.02015,
     0.06094, 0.06966, 0.00153, 0.00772, 0.04025, 0.02406, 0.06749,
     0.07507, 0.01929, 0.00095, 0.05987, 0.06327, 0.09056, 0.02758,
-    0.00978, 0.02360, 0.00150, 0.01974, 0.00074};
+    0.00978, 0.02360, 0.00150, 0.01974, 0.00074
+  };
   
   public static String encode(String text, String key) {
     int keyLen = key.length();
-    key = preprocess(key);
     StringBuilder sb = new StringBuilder(text.length());
-    int j = 0;
     for (int i = 0; i < text.length(); i++) {
-      if (!Character.isLetter(text.charAt(i))) {
-        sb.append(text.charAt(i));
-        continue;
-      }
-
       int c = text.charAt(i) - 'a';
-      int offset = key.charAt((j++) % keyLen) - 'a';
+      int offset = key.charAt(i % keyLen) - 'a';
       sb.append((char) ((c + offset) % 26 + 'a'));
+    }
+    
+    return sb.toString();
+  }
+  
+  public static String decode(String text, String key) {
+    int keyLen = key.length();
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < text.length(); i++) {
+      int c = text.charAt(i) - 'a';
+      int offset = key.charAt(i % keyLen) - 'a';
+      sb.append((char) ((c - offset + 26) % 26 + 'a'));
     }
     
     return sb.toString();
@@ -71,25 +78,66 @@ public class Main {
     return -1;
   }
   
+  public static double findCorrelation(double[] a, double[] b) {
+    double correlation = 0;
+    for (int i = 0; i < a.length; i++)
+      correlation += a[i] * b[i];
+    return correlation;
+  }
+  
   // find length of key using coincidence index
   // find the mapping using frequency analysis
   // return decoded key
-  public static String decode(String text) {
+  public static String decrypt(String text) {
     int len = findKeyLength(text);
-    System.out.println(len);
-    return null;
+    StringBuilder key = new StringBuilder();
+  
+    // for each letter find new distribution
+    // find the correlation of distibution
+    // save max value for given character
+    // append the character to the given key
+    // return decoded text
+    for (int sequence = 1; sequence <= len; sequence++) {
+      double maxCorrelation = 0;
+      char maxChar = 'a';
+      for (int i = 0; i < 26; i++) {
+        char currChar = (char) (i + 'a');
+        int count = 0;
+        
+        double[] distribution = new double[26];
+        for (int k = sequence - 1; k < text.length(); k += len) {
+          int c = (text.charAt(k) - 'a' - i + 26) % 26;
+          distribution[c]++;
+          count++;
+        }
+        
+        for (int k = 0; k < 26; k++) {
+          distribution[k] /= count;
+        }
+        
+        double correlation = findCorrelation(distribution, FREQUENCIES);
+        if (correlation > maxCorrelation) {
+          maxCorrelation = correlation;
+          maxChar = currChar;
+        }
+      }
+      
+      key.append(maxChar);
+    }
+    
+    return decode(text, key.toString());
   }
   
   public static void main(String[] args) throws IOException {
     String key = "abc";
     String text = preprocess(Files.readString(Path.of("resources/small.txt")));
     String encoded = encode(text, key);
-    decode(encoded.substring(0, 250));
-    //String encoded = "QPWKALVRXCQZIKGRBPFAEOMFLJMSDZVDHXCXJYEBIMTRQWNMEAIZRVKCVKVLXNEICFZPZCZZHKMLVZVZIZRRQWDKECHOSNYXXLSPMYKVQXJTDCIOMEEXDQVSRXLRLKZHOV".toLowerCase();
-    //System.out.println(key);
-    //System.out.println(text);
-    //System.out.println(encoded);
-    //String decoded = decode(encoded);
-    //System.out.println("Decrypted correctly: " + text.equals(decoded));
+    String decoded = decrypt(encoded);
+    
+    System.out.println("Key: " + key);
+    System.out.println("Text: " + text);
+    System.out.println("Encoded: " + encoded);
+    System.out.println("Decoded: " + decoded);
+    System.out.println("Decrypted correctly: " + text.equals(decoded));
   }
 }
