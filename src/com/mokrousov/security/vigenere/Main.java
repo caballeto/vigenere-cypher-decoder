@@ -29,13 +29,16 @@ public class Main {
     return text.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
   }
   
+  public static String decode(String text) {
+    return null;
+  }
+  
   // TODO: uppercase letters
   public static void main(String[] args) throws IOException {
-    // read text from file
-    // find the length of the key
-    // use frequency analysis to determine the mapping for each letter
-    //String text = Files.readString(Path.of("resources/encoded.txt"));
-    //System.out.println(text);
-    System.out.println(encode("The quick brown fox jumps over 13 lazy dogs.", "abc"));
+    String key = "abc";
+    String text = Files.readString(Path.of("resources/encoded.txt")).replaceAll("\n", "").toLowerCase();
+    String encoded = encode(text, key);
+    String decoded = decode(encoded);
+    System.out.println("Decrypted correctly: " + text.equals(decoded));
   }
 }
